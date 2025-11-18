@@ -11,7 +11,6 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete, categoriesM
         { "opacity-60 line-through": task.completed }
       )}
     >
-      {/* Left section: checkbox and task info */}
       <div className="flex items-start sm:items-center gap-2 flex-1">
         <input
           type="checkbox"
@@ -25,7 +24,7 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete, categoriesM
           <div
             className={clsx(
               "font-medium",
-              "dark:text-white", // Ensure text is visible in dark mode
+              "dark:text-white",
               { "text-black dark:text-white": !task.completed }
             )}
           >
@@ -37,7 +36,7 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete, categoriesM
         </div>
       </div>
 
-      {/* Right section: category badge, edit & delete buttons */}
+      
       <div className="flex items-center gap-2 mt-2 sm:mt-0">
         {cat && (
           <div className="flex items-center gap-1 text-xs">

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "/api", // <-- proxy prefix
+  baseURL: "/api",
   headers: { "Content-Type": "application/json" },
   timeout: 8000,
 });
