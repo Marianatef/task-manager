@@ -16,10 +16,12 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("default");
 
+  // Save categories to localStorage
   useEffect(() => {
     writeJSON(CATS_KEY, categories);
   }, [categories]);
 
+  // Load tasks from API
   useEffect(() => {
     async function loadTasks() {
       setLoading(true);
@@ -45,9 +47,9 @@ export default function Home() {
     loadTasks();
   }, []);
 
+  // Create new task
   async function handleCreate(text, categoryId) {
     const payload = { todo: text, completed: false, userId: 1 };
-
     try {
       const created = await addTodo(payload);
       const newTask = {
@@ -71,11 +73,11 @@ export default function Home() {
     }
   }
 
+  // Toggle task completion
   async function handleToggle(task) {
     setTasks((s) =>
       s.map((t) => (t.id === task.id ? { ...t, completed: !t.completed } : t))
     );
-
     try {
       await updateTodo(task.id, { completed: !task.completed });
     } catch (err) {
@@ -83,6 +85,7 @@ export default function Home() {
     }
   }
 
+  // Delete task
   async function handleDelete(task) {
     setTasks((s) => s.filter((t) => t.id !== task.id));
     try {
@@ -92,6 +95,7 @@ export default function Home() {
     }
   }
 
+  // Edit task
   async function handleEdit(task) {
     const v = prompt("Edit task text", task.todo);
     if (!v || !v.trim()) return;
@@ -107,6 +111,7 @@ export default function Home() {
     }
   }
 
+  // Category management
   function addCategory(name) {
     if (!name) return;
     const colors = ["#60a5fa", "#f472b6", "#f59e0b", "#34d399", "#a78bfa", "#fb7185"];
@@ -122,14 +127,23 @@ export default function Home() {
     );
   }
 
-  const sorted = (() => {
+  // Sort tasks
+  const sortedTasks = (() => {
     const copy = [...tasks];
-    if (sortBy === "alpha")
-      copy.sort((a, b) => (a.todo || "").localeCompare(b.todo || ""));
-    return copy;
+    switch (sortBy) {
+      case "alpha":
+        return copy.sort((a, b) => (a.todo || "").localeCompare(b.todo || ""));
+      case "completed":
+        return copy.sort((a, b) => b.completed - a.completed);
+      case "active":
+        return copy.sort((a, b) => a.completed - b.completed);
+      default:
+        return copy;
+    }
   })();
 
-  const filteredTasks = sorted.filter((t) => {
+  // Filter + search tasks
+  const filteredTasks = sortedTasks.filter((t) => {
     if (filter === "active" && t.completed) return false;
     if (filter === "completed" && !t.completed) return false;
     if (search) return (t.todo || "").toLowerCase().includes(search.toLowerCase());
@@ -138,11 +152,13 @@ export default function Home() {
 
   return (
     <div className="space-y-4 p-2 sm:p-4 md:p-6 lg:p-8">
+      {/* Create Task */}
       <section className="p-4 border rounded bg-white dark:bg-slate-800">
         <h2 className="font-medium mb-2 text-sm sm:text-base md:text-lg lg:text-xl">Create Task</h2>
         <TaskForm onCreate={handleCreate} categories={categories} />
       </section>
 
+      {/* Tasks List */}
       <section className="p-4 border rounded">
         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 mb-3 flex-wrap">
           <div className="flex gap-2 mb-2 sm:mb-0">
@@ -173,9 +189,15 @@ export default function Home() {
             className="px-2 py-1 border rounded flex-1 text-black"
           />
 
-          <select className="px-2 py-1 border rounded text-black mt-2 sm:mt-0">
+          <select
+            className="px-2 py-1 border rounded text-black mt-2 sm:mt-0"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
             <option value="default">Default</option>
             <option value="alpha">A → Z</option>
+            <option value="completed">Completed First</option>
+            <option value="active">Active First</option>
           </select>
         </div>
 
@@ -192,6 +214,7 @@ export default function Home() {
         />
       </section>
 
+      {/* Categories */}
       <section className="p-4 border rounded">
         <h3 className="font-medium mb-2 text-sm sm:text-base md:text-lg lg:text-xl">Categories</h3>
         <div className="flex gap-2 items-center mb-3">
@@ -215,6 +238,7 @@ export default function Home() {
   );
 }
 
+// Category Form
 function CategoryForm({ onAdd }) {
   const [v, setV] = useState("");
 
